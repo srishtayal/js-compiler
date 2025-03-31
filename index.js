@@ -1,12 +1,32 @@
+const readline = require('readline');
 const compiler = require('./compiler');
 
-const input = '(add 2 (sub 4 2))';
-const output = compiler(input);
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
-console.log("Generated JavaScript Code:", output);
+const operations = {
+    add: (a, b) => a + b,
+    sub: (a, b) => a - b,
+    mul: (a, b) => a * b,
+    div: (a, b) => a / b
+};
 
-const add = (a, b) => a + b;
-const sub = (a, b) => a - b;
+const functionDefinitions = Object.entries(operations)
+    .map(([name, fn]) => `const ${name} = ${fn.toString()};`)
+    .join('\n');
 
-const result = eval(output);
-console.log("Execution Result:", result);
+rl.question("Enter Lisp-like expression: ", (input) => {
+    try {
+        const output = compiler(input);
+        console.log("Generated JavaScript Code:", output);
+
+        const result = eval(`${functionDefinitions}\n${output}`);
+        console.log("Execution Result:", result);
+    } catch (error) {
+        console.error("Execution Error:", error);
+    }
+    
+    rl.close();
+});
